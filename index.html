@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Shamim Ahsan — AI Editor & Creator. AI video, photo, article, software and website services." />
+  <title>Shamim Ahsan — AI Editor & Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg: #07070d;
+      --bg-soft: #0e0e1a;
+      --card: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #eef0ff;
+      --muted: #9aa0c0;
+      --violet: #7c5cff;
+      --cyan: #22d3ee;
+      --pink: #ff4ecd;
+      --grad: linear-gradient(120deg, #7c5cff 0%, #22d3ee 50%, #ff4ecd 100%);
+      --radius: 20px;
+      --shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.75);
+      --maxw: 1180px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, .brand, .price { font-family: "Space Grotesk", sans-serif; }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+    /* ---------- Animated background ---------- */
+    .bg-orbs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.45;
+      animation: float 18s ease-in-out infinite;
+    }
+    .orb.a { width: 480px; height: 480px; background: #7c5cff; top: -140px; left: -120px; }
+    .orb.b { width: 420px; height: 420px; background: #22d3ee; top: 30%; right: -140px; animation-delay: -6s; }
+    .orb.c { width: 380px; height: 380px; background: #ff4ecd; bottom: -160px; left: 30%; animation-delay: -12s; }
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 70%);
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(40px, -30px) scale(1.1); }
+      66% { transform: translate(-30px, 40px) scale(0.95); }
+    }
+
+    /* ---------- Navbar ---------- */
+    header.nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(14px);
+      background: rgba(7, 7, 13, 0.6);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    header.nav.scrolled { border-color: var(--border); background: rgba(7, 7, 13, 0.85); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+    .brand { font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+    .brand .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--grad); box-shadow: 0 0 16px var(--violet);
+      animation: pulse 2.5s infinite;
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+
+    nav.links { display: flex; gap: 6px; align-items: center; }
+    nav.links a {
+      padding: 9px 16px; border-radius: 999px; font-size: 0.92rem; color: var(--muted);
+      transition: color 0.25s ease, background 0.25s ease;
+    }
+    nav.links a:hover, nav.links a.active { color: var(--text); background: var(--card); }
+    .nav-cta {
+      padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
+      background: var(--grad); color: #07070d; background-size: 200% 200%;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -8px var(--violet); }
+
+    .burger { display: none; background: none; border: 0; cursor: pointer; flex-direction: column; gap: 5px; padding: 8px; }
+    .burger span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: 0.3s; }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: 0;
+      font-family: inherit; font-weight: 600; font-size: 0.95rem;
+      padding: 14px 28px; border-radius: 999px; transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    .btn-primary { background: var(--grad); background-size: 200% 200%; color: #07070d; animation: gradmove 6s ease infinite; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -12px var(--violet); }
+    @keyframes gradmove { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { transform: translateY(-3px); border-color: var(--violet); }
+
+    /* ---------- Sections ---------- */
+    section { padding: 100px 0; position: relative; }
+    .eyebrow {
+      display: inline-block; font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--cyan); font-weight: 600; margin-bottom: 16px;
+    }
+    .section-head { text-align: center; max-width: 680px; margin: 0 auto 60px; }
+    .section-head h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); letter-spacing: -0.02em; line-height: 1.15; }
+    .section-head p { color: var(--muted); margin-top: 16px; font-size: 1.02rem; }
+    .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* ---------- Hero ---------- */
+    #home { min-height: calc(100vh - 72px); display: flex; align-items: center; padding-top: 40px; }
+    .hero-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 60px; align-items: center; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); margin-bottom: 26px;
+    }
+    .hero-badge .live { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 10px #34d399; animation: pulse 2s infinite; }
+    .hero h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1.05; letter-spacing: -0.03em; }
+    .hero p.lead { color: var(--muted); font-size: 1.12rem; margin: 24px 0 36px; max-width: 540px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 40px; margin-top: 56px; flex-wrap: wrap; }
+    .hero-stats .num { font-family: "Space Grotesk"; font-size: 1.9rem; font-weight: 700; }
+    .hero-stats .lbl { color: var(--muted); font-size: 0.85rem; }
+
+    .hero-visual {
+      position: relative; aspect-ratio: 1 / 1; border-radius: 32px; overflow: hidden;
+      background: linear-gradient(160deg, rgba(124,92,255,0.18), rgba(34,211,238,0.1));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      display: grid; place-items: center;
+    }
+    .hero-visual .ring {
+      position: absolute; inset: 12%; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.15);
+      animation: spin 26s linear infinite;
+    }
+    .hero-visual .ring.two { inset: 24%; animation-duration: 18s; animation-direction: reverse; border-style: solid; border-color: rgba(124,92,255,0.3); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .core {
+      width: 44%; aspect-ratio: 1; border-radius: 50%; background: var(--grad); background-size: 200% 200%;
+      animation: gradmove 6s ease infinite, pulsecore 4s ease-in-out infinite; box-shadow: 0 0 60px var(--violet);
+    }
+    @keyframes pulsecore { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+    .float-chip {
+      position: absolute; padding: 10px 16px; border-radius: 14px; font-size: 0.82rem; font-weight: 500;
+      background: rgba(14,14,26,0.85); border: 1px solid var(--border); backdrop-filter: blur(8px);
+      animation: bob 5s ease-in-out infinite;
+    }
+    .float-chip.c1 { top: 14%; left: 6%; animation-delay: 0s; }
+    .float-chip.c2 { top: 30%; right: 4%; animation-delay: -1.5s; }
+    .float-chip.c3 { bottom: 20%; left: 10%; animation-delay: -3s; }
+    .float-chip.c4 { bottom: 10%; right: 12%; animation-delay: -2s; }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+    /* ---------- Services ---------- */
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
+    .service-card {
+      position: relative; padding: 32px; border-radius: var(--radius); background: var(--card);
+      border: 1px solid var(--border); overflow: hidden; transition: transform 0.35s ease, border-color 0.35s ease;
+    }
+    .service-card::before {
+      content: ""; position: absolute; inset: 0; background: var(--grad); opacity: 0;
+      transition: opacity 0.35s ease; z-index: 0; mix-blend-mode: overlay;
+    }
+    .service-card:hover { transform: translateY(-8px); border-color: rgba(124,92,255,0.5); }
+    .service-card:hover::before { opacity: 0.12; }
+    .service-card > * { position: relative; z-index: 1; }
+    .service-icon {
+      width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center; font-size: 1.6rem;
+      background: linear-gradient(140deg, rgba(124,92,255,0.25), rgba(34,211,238,0.15));
+      border: 1px solid var(--border); margin-bottom: 22px; transition: transform 0.35s ease;
+    }
+    .service-card:hover .service-icon { transform: scale(1.1) rotate(-6deg); }
+    .service-card h3 { font-size: 1.22rem; margin-bottom: 10px; }
+    .service-card p { color: var(--muted); font-size: 0.94rem; }
+    .service-card .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .tag { font-size: 0.75rem; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ---------- Pricing ---------- */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; align-items: stretch; }
+    .price-card {
+      position: relative; padding: 38px 32px; border-radius: var(--radius); background: var(--card);
+      border: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+    .price-card:hover { transform: translateY(-8px); border-color: rgba(255,255,255,0.2); }
+    .price-card.featured {
+      background: linear-gradient(180deg, rgba(124,92,255,0.16), rgba(34,211,238,0.06));
+      border-color: rgba(124,92,255,0.55); box-shadow: 0 30px 80px -30px var(--violet);
+      transform: scale(1.02);
+    }
+    .price-card.featured:hover { transform: scale(1.02) translateY(-8px); }
+    .price-badge {
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      padding: 6px 18px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; background: var(--grad); color: #07070d; white-space: nowrap;
+    }
+    .price-card h3 { font-size: 1.3rem; }
+    .price-card .desc { color: var(--muted); font-size: 0.86rem; margin: 6px 0 22px; min-height: 38px; }
+    .price { font-size: 3rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+    .price small { font-size: 1rem; color: var(--muted); font-weight: 500; }
+    .price-note { color: var(--cyan); font-size: 0.85rem; margin-top: 10px; font-weight: 500; }
+    .features { list-style: none; margin: 28px 0; display: flex; flex-direction: column; gap: 13px; flex: 1; }
+    .features li { display: flex; gap: 12px; font-size: 0.93rem; color: var(--muted); align-items: flex-start; }
+    .features li::before {
+      content: "✓"; flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 0.7rem; font-weight: 700; background: rgba(52,211,153,0.15); color: #34d399;
+    }
+    .features li.off { opacity: 0.4; }
+    .features li.off::before { content: "✕"; background: rgba(255,255,255,0.06); color: var(--muted); }
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    /* ---------- About ---------- */
+    .about-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: center; }
+    .about-photo {
+      position: relative; aspect-ratio: 4 / 5; border-radius: 28px; overflow: hidden;
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      background: linear-gradient(160deg, #1a1030, #0b1a22);
+      display: grid; place-items: center;
+    }
+    .about-photo img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%;
+      filter: saturate(1.05);
+    }
+    .about-photo::before {
+      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(180deg, transparent 45%, rgba(7,7,13,0.85) 100%);
+    }
+    .about-photo .initials {
+      font-family: "Space Grotesk"; font-size: 5rem; font-weight: 700;
+      background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .about-photo::after {
+      content: ""; position: absolute; inset: 0; border-radius: 28px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .about-badge {
+      position: absolute; bottom: 18px; left: 18px; right: 18px; padding: 14px 18px; border-radius: 16px;
+      background: rgba(7,7,13,0.75); backdrop-filter: blur(12px); border: 1px solid var(--border);
+    }
+    .about-badge strong { display: block; font-family: "Space Grotesk"; font-size: 1.1rem; }
+    .about-badge span { color: var(--cyan); font-size: 0.85rem; }
+    .about h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 20px; }
+    .about p { color: var(--muted); margin-bottom: 16px; }
+    .about-skills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+    .skill { padding: 8px 16px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); font-size: 0.85rem; transition: 0.25s; }
+    .skill:hover { border-color: var(--violet); transform: translateY(-2px); }
+
+    /* ---------- Contact ---------- */
+    .contact-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 50px; }
+    .contact-info h3 { font-size: 1.5rem; margin-bottom: 16px; }
+    .contact-info p { color: var(--muted); margin-bottom: 30px; }
+    .info-item { display: flex; gap: 14px; align-items: center; margin-bottom: 18px; }
+    .info-item .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--card); border: 1px solid var(--border); font-size: 1.1rem; }
+    .info-item .txt { font-size: 0.95rem; }
+    .info-item .txt span { display: block; color: var(--muted); font-size: 0.8rem; }
+
+    form.contact-form {
+      padding: 36px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 0.85rem; margin-bottom: 8px; color: var(--muted); font-weight: 500; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 13px 16px; border-radius: 12px; font-family: inherit; font-size: 0.95rem;
+      background: rgba(0,0,0,0.35); border: 1px solid var(--border); color: var(--text);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .field textarea { resize: vertical; min-height: 130px; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--violet); box-shadow: 0 0 0 4px rgba(124,92,255,0.18);
+    }
+    .field input.invalid, .field textarea.invalid, .field select.invalid { border-color: #ff5470; }
+    .error-msg { color: #ff5470; font-size: 0.78rem; margin-top: 6px; display: none; }
+    .error-msg.show { display: block; }
+    .form-note { font-size: 0.8rem; color: var(--muted); margin-top: 16px; text-align: center; }
+    .form-success {
+      display: none; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px;
+      background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.4); color: #6ee7b7; font-size: 0.9rem;
+    }
+    .form-success.show { display: block; animation: fadeup 0.4s ease; }
+
+    /* ---------- Footer ---------- */
+    footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; }
+    footer p { color: var(--muted); font-size: 0.88rem; }
+    footer .socials { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+    footer .socials a { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--card); border: 1px solid var(--border); transition: 0.25s; }
+    footer .socials a:hover { border-color: var(--violet); transform: translateY(-3px); }
+
+    /* ---------- Reveal animation ---------- */
+    .reveal { opacity: 0; transform: translateY(34px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.in { opacity: 1; transform: none; }
+    @keyframes fadeup { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* scroll progress */
+    .progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--grad); z-index: 200; transition: width 0.1s linear; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual { max-width: 380px; margin: 0 auto; width: 100%; }
+      .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+      .about-photo { max-width: 320px; margin: 0 auto; width: 100%; }
+      section { padding: 80px 0; }
+    }
+    @media (max-width: 680px) {
+      nav.links {
+        position: fixed; inset: 72px 0 auto 0; flex-direction: column; gap: 4px; padding: 18px 24px 26px;
+        background: rgba(7,7,13,0.97); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
+        transform: translateY(-130%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+      }
+      nav.links.open { transform: translateY(0); }
+      nav.links a { width: 100%; padding: 12px 16px; }
+      .nav-cta { display: none; }
+      .burger { display: flex; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero-stats { gap: 26px; }
+      .price-card.featured { transform: none; }
+      .price-card.featured:hover { transform: translateY(-8px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+
+  <div class="bg-orbs">
+    <div class="orb a"></div>
+    <div class="orb b"></div>
+    <div class="orb c"></div>
+  </div>
+  <div class="grid-overlay"></div>
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a href="#home" class="brand"><span class="dot"></span>Shamim Ahsan</a>
+      <nav class="links" id="navLinks">
+        <a href="#home" class="active">Home</a>
+        <a href="#services">AI Services</a>
+        <a href="#pricing">Package Price</a>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact Us</a>
+      </nav>
+      <a href="#contact" class="nav-cta">Get Started</a>
+      <button class="burger" id="burger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= HOME ================= -->
+  <section id="home">
+    <div class="wrap hero-grid">
+      <div class="hero">
+        <div class="hero-badge reveal"><span class="live"></span> Available for new projects</div>
+        <h1 class="reveal">AI Editor &amp; Creator<br><span class="grad-text">Shamim Ahsan</span></h1>
+        <p class="lead reveal">I craft high-impact digital content with AI — from cinematic videos and stunning visuals to sharp articles, custom software, and modern websites that convert.</p>
+        <div class="hero-actions reveal">
+          <a href="#services" class="btn btn-primary">Explore AI Services →</a>
+          <a href="#pricing" class="btn btn-ghost">View Packages</a>
+        </div>
+        <div class="hero-stats reveal">
+          <div><div class="num grad-text">500+</div><div class="lbl">Projects Delivered</div></div>
+          <div><div class="num grad-text">5</div><div class="lbl">AI Service Lines</div></div>
+          <div><div class="num grad-text">30</div><div class="lbl">Days / Package</div></div>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal">
+        <div class="ring"></div>
+        <div class="ring two"></div>
+        <div class="core"></div>
+        <div class="float-chip c1">🎬 AI Video</div>
+        <div class="float-chip c2">🖼️ AI Photo</div>
+        <div class="float-chip c3">✍️ AI Writing</div>
+        <div class="float-chip c4">💻 AI Web &amp; Code</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AI SERVICES ================= -->
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">AI Services</span>
+        <h2>Everything you need, <span class="grad-text">powered by AI</span></h2>
+        <p>Five specialised service lines that cover the full creative and technical spectrum — built for speed, scale, and quality.</p>
+      </div>
+
+      <div class="services-grid">
+        <article class="service-card reveal">
+          <div class="service-icon">🎬</div>
+          <h3>AI Video Generation</h3>
+          <p>Cinematic promo videos, product demos, and social reels generated and edited end-to-end with AI tools.</p>
+          <div class="tags"><span class="tag">Reels &amp; Shorts</span><span class="tag">Voiceover</span><span class="tag">Subtitles</span></div>
+        </article>
+
+        <article class="service-card reveal">
+          <div class="service-icon">🖼️</div>
+          <h3>AI Photo Generation</h3>
+          <p>Scroll-stopping visuals, product photography, avatars, and brand imagery crafted with generative AI.</p>
+          <div class="tags"><span class="tag">Product Shots</span><span class="tag">Avatars</span><span class="tag">4K Upscale</span></div>
+        </article>
+
+        <article class="service-card reveal">
+          <div class="service-icon">✍️</div>
+          <h3>AI Article Writing</h3>
+          <p>SEO-optimised blogs, landing page copy, and long-form articles that rank and read naturally.</p>
+          <div class="tags"><span class="tag">SEO Blog</span><span class="tag">Copywriting</span><span class="tag">Email</span></div>
+        </article>
+
+        <article class="service-card reveal">
+          <div class="service-icon">💻</div>
+          <h3>AI Software Development</h3>
+          <p>Custom tools, automations, bots, and lightweight apps built quickly with AI-assisted development.</p>
+          <div class="tags"><span class="tag">Automation</span><span class="tag">Chatbots</span><span class="tag">APIs</span></div>
+        </article>
+
+        <article class="service-card reveal">
+          <div class="service-icon">🌐</div>
+          <h3>AI Website Development</h3>
+          <p>Responsive, fast, modern websites and landing pages designed and built with AI-accelerated workflows.</p>
+          <div class="tags"><span class="tag">Responsive</span><span class="tag">Landing Pages</span><span class="tag">E-commerce</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PACKAGE PRICE ================= -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Package Price</span>
+        <h2>Simple plans, <span class="grad-text">serious value</span></h2>
+        <p>Every package includes <strong>30 days of full service</strong>. Higher tiers unlock more deliverables, faster turnaround, and priority support.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Standard -->
+        <article class="price-card reveal">
+          <h3>Standard</h3>
+          <p class="desc">Perfect for solo creators getting started with AI content.</p>
+          <div class="price">$300<small>/mo</small></div>
+          <div class="price-note">30 days of service included</div>
+          <ul class="features">
+            <li>5 AI videos / month</li>
+            <li>20 AI photos / month</li>
+            <li>4 AI articles / month</li>
+            <li>1 landing page</li>
+            <li>Email support (48h)</li>
+            <li class="off">Priority turnaround</li>
+            <li class="off">Dedicated manager</li>
+          </ul>
+          <a href="#contact" class="btn btn-ghost">Choose Standard</a>
+        </article>
+
+        <!-- Pro (featured) -->
+        <article class="price-card featured reveal">
+          <span class="price-badge">Most Popular</span>
+          <h3>Pro</h3>
+          <p class="desc">For growing brands that need consistent, high-volume output.</p>
+          <div class="price">$550<small>/mo</small></div>
+          <div class="price-note">30 days of service included</div>
+          <ul class="features">
+            <li>15 AI videos / month</li>
+            <li>60 AI photos / month</li>
+            <li>12 AI articles / month</li>
+            <li>3 pages / custom software module</li>
+            <li>Priority email + chat support (12h)</li>
+            <li>Priority turnaround</li>
+            <li class="off">Dedicated manager</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary">Choose Pro</a>
+        </article>
+
+        <!-- Studio -->
+        <article class="price-card reveal">
+          <span class="price-badge" style="background: linear-gradient(120deg,#ff4ecd,#7c5cff);">Best Value</span>
+          <h3>Studio</h3>
+          <p class="desc">Maximum everything — for teams and agencies that scale fast.</p>
+          <div class="price">$850<small>/mo</small></div>
+          <div class="price-note">30 days of service included</div>
+          <ul class="features">
+            <li>Unlimited AI videos</li>
+            <li>Unlimited AI photos</li>
+            <li>Unlimited AI articles</li>
+            <li>Full website + custom software</li>
+            <li>24/7 priority support</li>
+            <li>Fastest turnaround</li>
+            <li>Dedicated account manager</li>
+          </ul>
+          <a href="#contact" class="btn btn-ghost">Choose Studio</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT US ================= -->
+  <section id="about" class="about">
+    <div class="wrap about-grid">
+      <div class="about-photo reveal">
+        <div class="initials">SA</div>
+        <div class="about-badge">
+          <strong>Shamim Ahsan</strong>
+          <span>AI Editor &amp; Creator</span>
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow reveal">About Us</span>
+        <h2 class="reveal">Turning AI into <span class="grad-text">real results</span></h2>
+        <p class="reveal">Hi, I'm <strong>Shamim Ahsan</strong>, an AI Editor and Creator. I blend creative direction with cutting-edge generative AI to help individuals and businesses produce content that stands out.</p>
+        <p class="reveal">Over the years I've delivered hundreds of projects across video, photography, writing, software, and web — always focused on quality, speed, and measurable impact. My goal is simple: give you agency-level output at a fraction of the time and cost.</p>
+        <div class="about-skills reveal">
+          <span class="skill">Generative Video</span>
+          <span class="skill">Prompt Engineering</span>
+          <span class="skill">AI Image Editing</span>
+          <span class="skill">SEO Writing</span>
+          <span class="skill">Web Development</span>
+          <span class="skill">Automation</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT US ================= -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Contact Us</span>
+        <h2>Let's build something <span class="grad-text">great together</span></h2>
+        <p>Fill in the form below and tell me what you need. I usually respond within one business day.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info reveal">
+          <h3>Get in touch</h3>
+          <p>Prefer email or a quick chat? Reach out through any of the channels below.</p>
+          <div class="info-item">
+            <div class="ic">✉️</div>
+            <div class="txt"><span>Email</span>hello@shamimahsan.ai</div>
+          </div>
+          <div class="info-item">
+            <div class="ic">💬</div>
+            <div class="txt"><span>WhatsApp</span>+1 (000) 000-0000</div>
+          </div>
+          <div class="info-item">
+            <div class="ic">📍</div>
+            <div class="txt"><span>Location</span>Remote — Worldwide</div>
+          </div>
+        </div>
+
+        <form class="contact-form reveal" id="contactForm" novalidate>
+          <div class="form-success" id="formSuccess">✅ Thanks! Your message has been received. I'll get back to you shortly.</div>
+          <div class="form-row">
+            <div class="field">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" placeholder="John Doe" required />
+              <div class="error-msg" data-for="name">Please enter your name.</div>
+            </div>
+            <div class="field">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" required />
+              <div class="error-msg" data-for="email">Please enter a valid email.</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="service">Service Needed</label>
+              <select id="service" name="service" required>
+                <option value="">Select a service…</option>
+                <option>AI Video Generation</option>
+                <option>AI Photo Generation</option>
+                <option>AI Article Writing</option>
+                <option>AI Software Development</option>
+                <option>AI Website Development</option>
+                <option>Multiple / Not sure</option>
+              </select>
+              <div class="error-msg" data-for="service">Please select a service.</div>
+            </div>
+            <div class="field">
+              <label for="package">Package Interest</label>
+              <select id="package" name="package">
+                <option value="">Optional</option>
+                <option>Standard — $300/mo</option>
+                <option>Pro — $550/mo</option>
+                <option>Studio — $850/mo</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="message">Project Details</label>
+            <textarea id="message" name="message" placeholder="Tell me about your project, goals, and timeline…" required></textarea>
+            <div class="error-msg" data-for="message">Please add a few details about your project.</div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Send Message →</button>
+          <p class="form-note">This is a demo form — it validates your input and confirms on-screen.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="wrap">
+      <div class="socials">
+        <a href="#" aria-label="Twitter">𝕏</a>
+        <a href="#" aria-label="Instagram">◎</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="YouTube">▶</a>
+      </div>
+      <p>© <span id="year"></span> Shamim Ahsan — AI Editor &amp; Creator. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Sticky nav + scroll progress
+    const nav = document.getElementById("nav");
+    const progress = document.getElementById("progress");
+    const onScroll = () => {
+      nav.classList.toggle("scrolled", window.scrollY > 20);
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + "%";
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    // Mobile menu
+    const burger = document.getElementById("burger");
+    const links = document.getElementById("navLinks");
+    burger.addEventListener("click", () => links.classList.toggle("open"));
+    links.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => links.classList.remove("open"))
+    );
+
+    // Reveal on scroll
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    document.querySelectorAll(".reveal").forEach((el, i) => {
+      el.style.transitionDelay = (i % 6) * 60 + "ms";
+      io.observe(el);
+    });
+
+    // Active nav link on scroll
+    const sections = [...document.querySelectorAll("section[id]")];
+    const navAnchors = [...document.querySelectorAll(".links a")];
+    const spy = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            navAnchors.forEach((a) =>
+              a.classList.toggle("active", a.getAttribute("href") === "#" + e.target.id)
+            );
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+    sections.forEach((s) => spy.observe(s));
+
+    // Contact form validation
+    const form = document.getElementById("contactForm");
+    const success = document.getElementById("formSuccess");
+
+    const showError = (el, show) => {
+      el.classList.toggle("invalid", show);
+      const msg = form.querySelector(`.error-msg[data-for="${el.id}"]`);
+      if (msg) msg.classList.toggle("show", show);
+    };
+
+    const validateField = (el) => {
+      let ok = el.value.trim().length > 0;
+      if (el.id === "email" && ok) ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+      if (el.id === "message" && ok) ok = el.value.trim().length >= 10;
+      showError(el, !ok);
+      return ok;
+    };
+
+    form.querySelectorAll("input, select, textarea").forEach((el) => {
+      el.addEventListener("blur", () => validateField(el));
+      el.addEventListener("input", () => {
+        if (el.classList.contains("invalid")) validateField(el);
+      });
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const required = ["name", "email", "service", "message"].map((id) =>
+        document.getElementById(id)
+      );
+      const allOk = required.map(validateField).every(Boolean);
+      if (!allOk) {
+        form.querySelector(".invalid")?.focus();
+        return;
+      }
+      success.classList.add("show");
+      form.reset();
+      success.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => success.classList.remove("show"), 6000);
+    });
+  </script>
+</body>
+</html>
